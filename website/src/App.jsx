@@ -7,6 +7,7 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import PrivateRoute from './utils/PrivateRoute';
+import { AuthProvider } from "./context/AuthContext";
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import Header from './components/Header';
@@ -14,11 +15,13 @@ import Header from './components/Header';
 function App() {
     return (
         <Router>
-            <Header />
-            <PrivateRoute path="/" element={<HomePage />} />
-            <Routes>
-                <Route path="/login" element={<LoginPage />} />
-            </Routes>
+            <AuthProvider>
+                <Header />
+                <PrivateRoute path="/" element={<HomePage />} />
+                <Routes>
+                    <Route path="/login" element={<LoginPage />} />
+                </Routes>
+            </AuthProvider>
         </Router>
     );
 }
