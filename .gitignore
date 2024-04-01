@@ -1,0 +1,10 @@
+~
+__pycache__
+/backend/*env
+/backend/*sqlite*
+
+
+/website/node_modules
+/website/coverage
+/website/build
+
