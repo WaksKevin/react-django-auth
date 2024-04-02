@@ -1,19 +1,20 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-const PrivateRoute = ({ element: Element, ...rest }) => {
-    // Add your authentication logic here
-    const isAuthenticated = false; // Example: You should implement your own logic here
+const PrivateRoute = ({ children, ...rest }) => {
+    const isAuthenticated = false;
+    console.log("Private Route works")
 
     return (
-        <Routes>
-            <Route
-                {...rest}
-                element={
-                    isAuthenticated ? <Element /> : <Navigate to="/login" replace />
-                }
-            />
-        </Routes>
+        <>
+            {!isAuthenticated ? (<Navigate to="/login"  />):
+                (
+                    <Routes>
+                        <Route {...rest}>{children}</Route>
+                    </Routes>
+                )
+            }
+        </>
     );
 };
 
