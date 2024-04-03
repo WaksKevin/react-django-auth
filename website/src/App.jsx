@@ -20,6 +20,7 @@ function App() {
                 <PrivateRoute path="/" element={<HomePage />} exact />
                 <Routes>
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/logout" element={<HomePage />} />
                 </Routes>
             </AuthProvider>
         </Router>
