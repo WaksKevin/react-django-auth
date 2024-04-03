@@ -1,5 +1,5 @@
-import React, { createContext, useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
+import React, { createContext, useEffect, useState, useCallback } from "react";
+import { jwtDecode } from "jwt-decode"; // Corrected import for jwt-decode
 import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   let [loading, setLoading] = useState(true);
 
   let navigate = useNavigate();
+
   let loginUser = async (e) => {
     e.preventDefault();
     try {
@@ -46,14 +47,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  let logoutUser = () => {
+  let logoutUser = useCallback(() => {
     setAuthTokens(null);
     setUser(null);
     localStorage.removeItem("authTokens");
     navigate("/login");
-  };
+  }, [setAuthTokens, setUser, navigate]);
 
-  let updateToken = async () => {
+  let updateToken = useCallback(async () => {
     console.log("Update token called");
     let response = await fetch("http://127.0.0.1:8000/api/token/refresh/", {
       method: "POST",
@@ -61,11 +62,11 @@ export const AuthProvider = ({ children }) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        refresh: authTokens.refresh,
+        refresh: authTokens?.refresh,
       }),
     });
     let data = await response.json();
-
+  
     if (response.status === 200) {
       setAuthTokens(data);
       setUser(jwtDecode(data.access));
@@ -73,8 +74,31 @@ export const AuthProvider = ({ children }) => {
     } else {
       logoutUser();
     }
-  };
 
+
+    if (loading) {
+      setLoading(false); // Set loading to false after calling updateToken
+    }
+  
+    // Remove the condition and setLoading call from here
+  }, [authTokens, logoutUser, loading]); // Include loading in the dependency array
+  
+  useEffect(() => {
+    // Move the loading condition and setLoading call inside useEffect
+    if (loading) {
+      updateToken();
+    }
+  
+    let fourMinutes = 1000 * 60 * 4;
+    let interval = setInterval(() => {
+      if (authTokens) {
+        updateToken();
+      }
+    }, fourMinutes);
+  
+    return () => clearInterval(interval);
+  }, [authTokens, updateToken, loading]); // Include loading in the dependency array
+  
   let contextData = {
     user: user,
     authTokens: authTokens,
@@ -82,22 +106,10 @@ export const AuthProvider = ({ children }) => {
     logoutUser: logoutUser,
   };
 
-  useEffect(() => {
-    // if (loading) {
-    //   updateToken();
-    // }
-    let tokenrefreshtime = 2000;
-    let interval = setInterval(() => {
-      if (authTokens) {
-        console.log(authTokens);
-        updateToken();
-      }
-    }, tokenrefreshtime);
-
-    return () => clearInterval(interval);
-  }, [authTokens, loading]);
   return (
-    <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={contextData}>
+      {loading ? null : children}
+    </AuthContext.Provider>
   );
 };
 
