@@ -79,12 +79,9 @@ export const AuthProvider = ({ children }) => {
     if (loading) {
       setLoading(false); // Set loading to false after calling updateToken
     }
-  
-    // Remove the condition and setLoading call from here
-  }, [authTokens, logoutUser, loading]); // Include loading in the dependency array
+  }, [authTokens, logoutUser, loading]);
   
   useEffect(() => {
-    // Move the loading condition and setLoading call inside useEffect
     if (loading) {
       updateToken();
     }
